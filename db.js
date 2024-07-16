@@ -1,5 +1,7 @@
+const express = require('express');
 const { Pool } = require('pg');
 
+// PostgreSQL connection configuration
 const pool = new Pool({
     host: 'localhost',  // or '127.0.0.1' if 'localhost' doesn't work
     port: 5432,         // Default PostgreSQL port is 5432
@@ -8,25 +10,23 @@ const pool = new Pool({
     database: 'expdb'
 });
 
-// Attempt to connect to PostgreSQL
-pool.connect((err, client, release) => {
-    if (err) {
-        return console.error('Error acquiring client', err.stack);
-    }
-    console.log('Connected to PostgreSQL database');
+const app = express();
+const port = 3000;
 
-    // Example query
-    client.query('SELECT NOW()', (err, result) => {
-        release(); // Release the client back to the pool
+// Endpoint to check database connection
+app.get('/check-connection', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+    res.status(200).send('Connected to PostgreSQL database successfully!');
+  } catch (err) {
+    console.error('Error connecting to the database', err);
+    res.status(500).send('Failed to connect to the PostgreSQL database.');
+  }
+});
 
-        if (err) {
-            return console.error('Error executing query', err.stack);
-        }
-        console.log('Query result:', result.rows[0]);
-
-        // Disconnect the client from the pool
-        pool.end(() => {
-            console.log('Pool has been disconnected');
-        });
-    });
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
