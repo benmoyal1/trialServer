@@ -26,7 +26,16 @@ app.get('/check-connection', async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+// Start the server with a database connection check
+app.listen(port, async () => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+    console.log('Connected to PostgreSQL database successfully!');
+    console.log(`Server is running on http://localhost:${port}`);
+  } catch (err) {
+    console.error('Failed to connect to the PostgreSQL database:', err);
+    process.exit(1); // Exit the process with an error code
+  }
 });
