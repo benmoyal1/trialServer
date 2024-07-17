@@ -7,7 +7,7 @@ const port = 3000;
 // PostgreSQL connection configuration
 const pool = new Pool({
   user: "postgres",
-  host: "localhost", // Change to your Docker host IP if necessary
+  host: "postgres-db", // Change to your Docker host IP if necessary
   database: "postgres",
   password: "123",
   port: 5432,
