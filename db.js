@@ -1,42 +1,84 @@
 const express = require('express');
-// const { Pool } = require('pg');
-
-// // PostgreSQL connection configuration
-// const pool = new Pool({
-//     host: 'localhost',  // or '127.0.0.1' if 'localhost' doesn't work
-//     port: 5432,         // Default PostgreSQL port is 5432
-//     user: 'postgres',
-//     password: '123',
-//     database: 'expdb'
-// });
+const { Pool } = require('pg');
 
 const app = express();
 const port = 3000;
 
-// Endpoint to check database connection
-app.get('/check-connection', async (req, res) => {
-  try {
-    // const client = await pool.connect();
-    // await client.query('SELECT NOW()');
-    // client.release();
-    res.status(200).send('We are good');
+// PostgreSQL connection configuration
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost', // Change to your Docker host IP if necessary
+  database: 'postgres',
+  password: '123',
+  port: 5432,
+});
 
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Endpoint to create a table, insert data, and return results
+app.post('/create_db', async (req, res) => {
+  try {
+    // Create a table
+    await createTable();
+
+    // Insert data into the table
+    await insertData();
+
+    // Fetch data from the table
+    const data = await fetchData();
+
+    // Return data in the response
+    res.status(200).json(data);
   } catch (err) {
-    console.error('Error connecting to the database', err);
-    res.status(500).send('Failed to connect to the PostgreSQL database.');
+    console.error('Error processing request:', err);
+    res.status(500).send('Error processing request');
   }
 });
 
-// Start the server with a database connection check
-app.listen(port, async () => {
+// Function to create a table
+async function createTable() {
+  const client = await pool.connect();
   try {
-    // const client = await pool.connect();
-    // await client.query('SELECT NOW()');
-    // client.release();
-    // console.log('Connected to PostgreSQL database successfully!');
-    console.log(`Server is running on http://localhost:${port}`);
-  } catch (err) {
-    console.error('Failed to connect to the PostgreSQL database:', err);
-    process.exit(1); // Exit the process with an error code
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        age INT NOT NULL
+      )
+    `);
+  } finally {
+    client.release();
   }
+}
+
+// Function to insert data into the table
+async function insertData() {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      INSERT INTO users (name, age) VALUES 
+      ('Alice', 30),
+      ('Bob', 25),
+      ('Charlie', 35)
+    `);
+  } finally {
+    client.release();
+  }
+}
+
+// Function to fetch data from the table
+async function fetchData() {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM users');
+    return result.rows;
+  } finally {
+    client.release();
+  }
+}
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
