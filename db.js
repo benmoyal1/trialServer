@@ -1,23 +1,30 @@
-const express = require('express');
-const { Pool } = require('pg');
+const express = require("express");
+const { Pool } = require("pg");
 
 const app = express();
 const port = 3000;
 
 // PostgreSQL connection configuration
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost', // Change to your Docker host IP if necessary
-  database: 'postgres',
-  password: '123',
+  user: "postgres",
+  host: "localhost", // Change to your Docker host IP if necessary
+  database: "postgres",
+  password: "123",
   port: 5432,
 });
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  try {
+    res.status(200).json({ hey: "you are good" });
+  } catch (err) {
+    res.status(500);
+  }
+});
 // Endpoint to create a table, insert data, and return results
-app.post('/create_db', async (req, res) => {
+app.post("/create_db", async (req, res) => {
   try {
     // Create a table
     await createTable();
@@ -31,8 +38,8 @@ app.post('/create_db', async (req, res) => {
     // Return data in the response
     res.status(200).json(data);
   } catch (err) {
-    console.error('Error processing request:', err);
-    res.status(500).send('Error processing request');
+    console.error("Error processing request:", err);
+    res.status(500).send("Error processing request");
   }
 });
 
@@ -71,7 +78,7 @@ async function insertData() {
 async function fetchData() {
   const client = await pool.connect();
   try {
-    const result = await client.query('SELECT * FROM users');
+    const result = await client.query("SELECT * FROM users");
     return result.rows;
   } finally {
     client.release();
