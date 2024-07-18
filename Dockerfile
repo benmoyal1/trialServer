@@ -1,18 +1,20 @@
-# Use the official Node.js image with LTS (Long Term Support)
+# Use the official Node.js image
 FROM node:14
 
-# Create app directory
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
+# Copy package.json and package-lock.json
 COPY package*.json ./
-RUN npm install
 
-# Bundle app source
+# Install dependencies
+RUN npm install pm2 -g && npm install
+
+# Copy the rest of the application code
 COPY . .
 
-# Expose the port your app runs on
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Command to run your application
-CMD ["node", "app.js"]
+# Start the app using PM2
+CMD ["pm2-runtime", "start", "app.js", "--name=nodejs-ssl-server"]
