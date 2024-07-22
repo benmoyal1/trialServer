@@ -2,7 +2,7 @@ const express = require("express");
 const { Pool } = require("pg");
 
 const app = express();
-const port = 3000;
+const port = 443;
 
 // PostgreSQL connection configuration
 const pool = new Pool({
@@ -89,3 +89,11 @@ async function fetchData() {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+
+
+// docker container prune -f && \
+// docker image prune -a -f && \
+// docker volume prune -f && \
+// docker network prune -f && \
+// docker builder prune -a -f
