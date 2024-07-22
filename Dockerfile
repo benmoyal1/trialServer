@@ -14,7 +14,7 @@ RUN npm install pm2 -g && npm install
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE 443
+EXPOSE 3000
 
 # Start the app using PM2
 CMD ["pm2-runtime", "start", "app.js", "--name=nodejs-ssl-server"]

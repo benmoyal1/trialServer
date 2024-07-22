@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "433:433"
+      - "433:3000"
     depends_on:
       - postgres-db
 
